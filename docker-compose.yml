@@ -1,0 +1,82 @@
+version: '3.9'
+services:
+  provisioning-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: provisioning
+      POSTGRES_USER: provisioning
+      POSTGRES_PASSWORD: provisioning
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U provisioning -d provisioning"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  keycloak-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 5432
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+
+  univerliga-identity-provisioning:
+    build: .
+    environment:
+      APP_VERSION: 0.1.0
+      PROVISIONING_MODE: mock-crm
+      DB_URL: jdbc:postgresql://provisioning-db:5432/provisioning
+      DB_USER: provisioning
+      DB_PASSWORD: provisioning
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASSWORD: guest
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/univerliga
+      KEYCLOAK_REALM: univerliga
+      KEYCLOAK_CLIENT_ID: univerliga-provisioning
+      KEYCLOAK_CLIENT_SECRET: provisioning-secret
+    ports:
+      - "8080:8080"
+    depends_on:
+      provisioning-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      rabbitmq:
+        condition: service_started

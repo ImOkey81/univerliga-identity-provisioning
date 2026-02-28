@@ -1,0 +1,73 @@
+{
+  "realm": "univerliga",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "ROLE_ADMIN" },
+      { "name": "ROLE_MANAGER" },
+      { "name": "ROLE_EMPLOYEE" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "univerliga-gateway",
+      "name": "univerliga-gateway",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "gateway-secret",
+      "serviceAccountsEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true
+    },
+    {
+      "clientId": "univerliga-provisioning",
+      "name": "univerliga-provisioning",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "provisioning-secret",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "admin.user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@example.com",
+      "credentials": [
+        { "type": "password", "value": "admin123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_ADMIN"]
+    },
+    {
+      "username": "manager.user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Manager",
+      "lastName": "User",
+      "email": "manager@example.com",
+      "credentials": [
+        { "type": "password", "value": "manager123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_MANAGER"]
+    },
+    {
+      "username": "employee.user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Employee",
+      "lastName": "User",
+      "email": "employee@example.com",
+      "credentials": [
+        { "type": "password", "value": "employee123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_EMPLOYEE"]
+    }
+  ]
+}
