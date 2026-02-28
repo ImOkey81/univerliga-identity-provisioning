@@ -38,6 +38,9 @@ public class ProcessedEvent {
     @Column(name = "attempt_count", nullable = false)
     private int attemptCount;
 
+    @Column(name = "fail_count", nullable = false)
+    private int failCount;
+
     @Column(name = "processed_at", nullable = false)
     private OffsetDateTime processedAt;
 

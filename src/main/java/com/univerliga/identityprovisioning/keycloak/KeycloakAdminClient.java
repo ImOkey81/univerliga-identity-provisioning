@@ -30,8 +30,10 @@ public class KeycloakAdminClient {
 
     public KeycloakProvisionedUser createOrUpdate(KeycloakUserCommand command) {
         String token = accessToken();
-        List<KeycloakUserRepresentation> byUsername = findByUsername(command.username(), token);
-        KeycloakUserRepresentation existing = byUsername.stream().findFirst().orElse(null);
+        KeycloakUserRepresentation existing = findByUsername(command.username(), token).stream().findFirst().orElse(null);
+        if (existing == null) {
+            existing = findByEmail(command.email(), token).stream().findFirst().orElse(null);
+        }
 
         boolean changed;
         String userId;
@@ -77,6 +79,7 @@ public class KeycloakAdminClient {
                 .uri(uriBuilder -> uriBuilder
                     .path("/admin/realms/{realm}/users")
                     .queryParam("username", username)
+                    .queryParam("exact", true)
                     .build(properties.getKeycloak().getRealm()))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
@@ -84,6 +87,23 @@ public class KeycloakAdminClient {
             return response == null ? Collections.emptyList() : Arrays.asList(response);
         } catch (RestClientException ex) {
             throw new BadGatewayException("Keycloak search user failed: " + ex.getMessage());
+        }
+    }
+
+    private List<KeycloakUserRepresentation> findByEmail(String email, String token) {
+        try {
+            KeycloakUserRepresentation[] response = keycloakRestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/admin/realms/{realm}/users")
+                    .queryParam("email", email)
+                    .queryParam("exact", true)
+                    .build(properties.getKeycloak().getRealm()))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .body(KeycloakUserRepresentation[].class);
+            return response == null ? Collections.emptyList() : Arrays.asList(response);
+        } catch (RestClientException ex) {
+            throw new BadGatewayException("Keycloak search user by email failed: " + ex.getMessage());
         }
     }
 

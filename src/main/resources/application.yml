@@ -3,8 +3,8 @@ spring:
     name: univerliga-identity-provisioning
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/provisioning}
-    username: ${DB_USER:provisioning}
-    password: ${DB_PASSWORD:provisioning}
+    username: ${DB_USER:${DB_USERNAME:provisioning}}
+    password: ${DB_PASS:${DB_PASSWORD:provisioning}}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -18,7 +18,7 @@ spring:
     host: ${RABBIT_HOST:localhost}
     port: ${RABBIT_PORT:5672}
     username: ${RABBIT_USER:guest}
-    password: ${RABBIT_PASSWORD:guest}
+    password: ${RABBIT_PASS:${RABBIT_PASSWORD:guest}}
   security:
     oauth2:
       resourceserver:
@@ -51,6 +51,7 @@ app:
       routing-updated: ${CRM_ROUTING_UPDATED:crm.person.updated}
       routing-deactivated: ${CRM_ROUTING_DEACTIVATED:crm.person.deactivated}
       max-retries: ${CRM_MAX_RETRIES:5}
+      max-fail-count: ${CRM_MAX_FAIL_COUNT:10}
   keycloak:
     base-url: ${KEYCLOAK_URL:http://localhost:8081}
     realm: ${KEYCLOAK_REALM:univerliga}
@@ -61,4 +62,4 @@ app:
 
 logging:
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{requestId}] %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [req:%X{requestId}] [event:%X{eventId}] %logger{36} - %msg%n"

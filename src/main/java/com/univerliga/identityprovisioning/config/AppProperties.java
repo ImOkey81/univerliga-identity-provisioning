@@ -30,6 +30,7 @@ public class AppProperties {
         private String routingUpdated;
         private String routingDeactivated;
         private int maxRetries = 5;
+        private int maxFailCount = 10;
     }
 
     @Getter

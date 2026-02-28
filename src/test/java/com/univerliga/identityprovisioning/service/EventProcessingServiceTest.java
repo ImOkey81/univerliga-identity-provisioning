@@ -1,5 +1,6 @@
 package com.univerliga.identityprovisioning.service;
 
+import com.univerliga.identityprovisioning.config.AppProperties;
 import com.univerliga.identityprovisioning.domain.EventType;
 import com.univerliga.identityprovisioning.domain.ProcessedEvent;
 import com.univerliga.identityprovisioning.domain.ProcessedEventStatus;
@@ -35,7 +36,9 @@ class EventProcessingServiceTest {
 
     @BeforeEach
     void setUp() {
-        eventProcessingService = new EventProcessingService(processedEventRepository, provisioningService);
+        AppProperties properties = new AppProperties();
+        properties.getProvisioning().getBroker().setMaxFailCount(10);
+        eventProcessingService = new EventProcessingService(processedEventRepository, provisioningService, properties);
     }
 
     @Test
@@ -71,6 +74,7 @@ class EventProcessingServiceTest {
             eventId,
             EventType.PersonCreated,
             OffsetDateTime.now(),
+            "crm-service",
             new CrmPayload("p_1", "user1", "user1@example.com", "User 1", Set.of("ROLE_EMPLOYEE"), true)
         );
     }
